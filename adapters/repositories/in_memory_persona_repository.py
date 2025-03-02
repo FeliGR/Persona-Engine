@@ -1,0 +1,64 @@
+import logging
+from typing import Optional, Dict, List
+import threading
+from application.persona_repository_interface import IPersonaRepository
+from core.persona_model import Persona
+
+
+class PersonaRepositoryError(Exception):
+
+    pass
+
+
+class InMemoryPersonaRepository(IPersonaRepository):
+
+    def __init__(self):
+        self._storage: Dict[str, Persona] = {}
+        self._lock = threading.RLock()
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialized InMemoryPersonaRepository")
+
+    def get_persona(self, user_id: str) -> Optional[Persona]:
+        if not user_id:
+            self._logger.error("Attempted to retrieve persona with empty user_id")
+            raise ValueError("user_id cannot be empty or None")
+
+        try:
+            with self._lock:
+                persona = self._storage.get(user_id)
+                self._logger.debug(
+                    f"Retrieved persona for user_id={user_id}: {'Found' if persona else 'Not found'}"
+                )
+                return persona
+        except Exception as e:
+            self._logger.exception(f"Error retrieving persona for user_id={user_id}")
+            raise PersonaRepositoryError(f"Failed to retrieve persona: {str(e)}") from e
+
+    def save_persona(self, user_id: str, persona: Persona) -> None:
+        if not user_id:
+            self._logger.error("Attempted to save persona with empty user_id")
+            raise ValueError("user_id cannot be empty or None")
+
+        if persona is None:
+            self._logger.error(f"Attempted to save None persona for user_id={user_id}")
+            raise ValueError("persona cannot be None")
+
+        try:
+            with self._lock:
+                self._storage[user_id] = persona
+                self._logger.debug(f"Saved persona for user_id={user_id}")
+        except Exception as e:
+            self._logger.exception(f"Error saving persona for user_id={user_id}")
+            raise PersonaRepositoryError(f"Failed to save persona: {str(e)}") from e
+
+    def list_personas(self, limit: int = 100, offset: int = 0) -> List[Persona]:
+        try:
+            with self._lock:
+                all_personas = list(self._storage.values())
+                self._logger.debug(
+                    f"Retrieved {len(all_personas[offset:offset+limit])} personas"
+                )
+                return all_personas[offset : offset + limit]
+        except Exception as e:
+            self._logger.exception(f"Error listing personas")
+            raise PersonaRepositoryError(f"Failed to list personas: {str(e)}") from e

@@ -1,0 +1,30 @@
+# Core framework
+Flask==2.3.3
+Werkzeug==2.3.7
+gunicorn==21.2.0
+
+# Extensions
+flask-cors==4.0.0
+flask-limiter==3.5.0
+limits==3.6.0
+
+# Data validation and serialization
+marshmallow==3.20.1
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9  # For PostgreSQL support
+alembic==1.12.1  # Database migrations
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# Monitoring and logging
+structlog==23.2.0
+
+# Utilities
+requests==2.31.0
+pydantic==2.5.2  # For data validation
+
+# Production monitoring
+prometheus-flask-exporter==0.22.4
