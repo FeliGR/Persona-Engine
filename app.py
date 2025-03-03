@@ -1,18 +1,22 @@
-from flask import Flask, jsonify, request, g
-from werkzeug.exceptions import HTTPException
 import atexit
-import time
 import os
+import time
+
 from typing import Type
+
+from flask import Flask, jsonify, request, g
+from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.exceptions import HTTPException
 
-from adapters.repositories.in_memory_persona_repository import InMemoryPersonaRepository
+from config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
 from application.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
+from application.get_persona_use_case import GetPersonaUseCase
 from application.update_persona_use_case import UpdatePersonaUseCase
 from adapters.controllers.persona_controller import create_persona_blueprint
+from adapters.repositories.in_memory_persona_repository import InMemoryPersonaRepository
 from utils.logger import logger
-from config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
 
 
 class ApplicationFactory:
@@ -61,10 +65,7 @@ class ApplicationFactory:
 
     @staticmethod
     def _register_extensions(app: Flask) -> None:
-        """Register Flask extensions."""
         if not app.config["TESTING"]:
-
-            from flask_cors import CORS
 
             CORS(
                 app,
@@ -81,11 +82,9 @@ class ApplicationFactory:
 
     @staticmethod
     def _register_repositories(app: Flask) -> None:
-        """Register repositories based on configuration."""
         repo_type = app.config.get("REPOSITORY_TYPE", "memory")
-        if repo_type == "memory":
-            app.persona_repository = InMemoryPersonaRepository()
-        elif repo_type == "postgres":
+
+        if repo_type == "postgres":
             from adapters.repositories.sqlalchemy_persona_repository import (
                 SQLAlchemyPersonaRepository,
             )
@@ -98,16 +97,17 @@ class ApplicationFactory:
 
     @staticmethod
     def _register_use_cases(app: Flask) -> None:
-        """Register use cases with their dependencies."""
         repo = app.persona_repository
         app.get_or_create_persona_use_case = GetOrCreatePersonaUseCase(repo)
+        app.get_persona_use_case = GetPersonaUseCase(repo)
         app.update_persona_use_case = UpdatePersonaUseCase(repo)
 
     @staticmethod
     def _register_blueprints(app: Flask) -> None:
-        """Register all blueprints with the app."""
         persona_bp = create_persona_blueprint(
-            app.get_or_create_persona_use_case, app.update_persona_use_case
+            app.get_persona_use_case,
+            app.get_or_create_persona_use_case,
+            app.update_persona_use_case,
         )
         app.register_blueprint(persona_bp)
 
@@ -152,12 +152,11 @@ class ApplicationFactory:
 
     @staticmethod
     def _register_request_hooks(app: Flask) -> None:
-        """Register request hooks for logging and metrics."""
 
         @app.before_request
         def before_request():
             g.start_time = time.time()
-            logger.debug(f"Request started: {request.method} {request.path}")
+            logger.info(f"Request started: {request.method} {request.path}")
 
         @app.after_request
         def after_request(response):
@@ -170,8 +169,6 @@ class ApplicationFactory:
 
     @staticmethod
     def _register_shutdown_handlers(app: Flask) -> None:
-        """Register shutdown handlers."""
-
         def on_exit():
             logger.info("Application shutting down")
             if hasattr(app, "persona_repository"):

@@ -1,11 +1,14 @@
-from flask import Blueprint, request, jsonify, current_app
-from marshmallow import Schema, fields, ValidationError
-from functools import wraps
 import time
+from functools import wraps
 from typing import Any, Callable, Dict, Tuple, TypeVar, cast
 
+from flask import Blueprint, request, jsonify, current_app
+from marshmallow import Schema, fields, ValidationError, validate
+
 from application.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
+from application.get_persona_use_case import GetPersonaUseCase, PersonaNotFoundError
 from application.update_persona_use_case import UpdatePersonaUseCase
+
 from utils.logger import logger
 
 ResponseType = Tuple[Dict[str, Any], int]
@@ -13,19 +16,22 @@ F = TypeVar("F", bound=Callable[..., ResponseType])
 
 
 class TraitUpdateSchema(Schema):
-
     trait = fields.String(
         required=True,
-        validate=lambda x: x
-        in [
-            "openness",
-            "conscientiousness",
-            "extraversion",
-            "agreeableness",
-            "neuroticism",
-        ],
+        validate=validate.OneOf(
+            [
+                "openness",
+                "conscientiousness",
+                "extraversion",
+                "agreeableness",
+                "neuroticism",
+            ]
+        ),
     )
-    value = fields.Float(required=True, validate=lambda x: 1.0 <= x <= 5.0)
+    value = fields.Float(
+        required=True,
+        validate=validate.Range(min=1.0, max=5.0),
+    )
 
 
 class ApiResponse:
@@ -64,16 +70,14 @@ def validate_user_id(f: F) -> F:
 
 
 def create_persona_blueprint(
-    get_or_create_uc: GetOrCreatePersonaUseCase, update_uc: UpdatePersonaUseCase
+    get_persona_uc: GetPersonaUseCase,
+    get_or_create_uc: GetOrCreatePersonaUseCase,
+    update_uc: UpdatePersonaUseCase,
 ) -> Blueprint:
     bp = Blueprint("persona", __name__)
 
     @bp.route("/api/persona", methods=["POST"])
     def create_persona() -> ResponseType:
-        """
-        Create a new persona.
-        You could either use default values or accept a JSON payload for customization.
-        """
         try:
             data = request.get_json(silent=True) or {}
 
@@ -82,16 +86,11 @@ def create_persona_blueprint(
                 return ApiResponse.error("user_id is required", status_code=400)
 
             persona = get_or_create_uc.execute(user_id)
-            persona_data = {
-                "user_id": user_id,
-                "openness": persona.openness,
-                "conscientiousness": persona.conscientiousness,
-                "extraversion": persona.extraversion,
-                "agreeableness": persona.agreeableness,
-                "neuroticism": persona.neuroticism,
-            }
+
+            setattr(persona, "user_id", user_id)
+
             return ApiResponse.success(
-                persona_data, message="Persona created", status_code=201
+                persona.to_dict(), message="Persona created", status_code=201
             )
         except Exception as e:
             logger.error(f"Error creating persona: {str(e)}", exc_info=True)
@@ -100,18 +99,14 @@ def create_persona_blueprint(
     @bp.route("/api/persona/<user_id>", methods=["GET"])
     @validate_user_id
     def get_persona(user_id: str) -> ResponseType:
-
         try:
-            persona = get_or_create_uc.execute(user_id)
-            persona_data = {
-                "user_id": user_id,
-                "openness": persona.openness,
-                "conscientiousness": persona.conscientiousness,
-                "extraversion": persona.extraversion,
-                "agreeableness": persona.agreeableness,
-                "neuroticism": persona.neuroticism,
-            }
-            return ApiResponse.success(persona_data)
+            try:
+                persona = get_persona_uc.execute(user_id)
+                return ApiResponse.success(persona.to_dict(), status_code=200)
+            except PersonaNotFoundError:
+                return ApiResponse.error(
+                    f"No persona found for user ID: {user_id}", status_code=404
+                )
         except Exception as e:
             logger.error(
                 f"Error retrieving persona for user {user_id}: {str(e)}", exc_info=True
@@ -136,17 +131,14 @@ def create_persona_blueprint(
 
             trait_name = validated_data["trait"]
             new_value = validated_data["value"]
-            updated = update_uc.execute(user_id, trait_name, new_value)
-            persona_data = {
-                "user_id": user_id,
-                "openness": updated.openness,
-                "conscientiousness": updated.conscientiousness,
-                "extraversion": updated.extraversion,
-                "agreeableness": updated.agreeableness,
-                "neuroticism": updated.neuroticism,
-            }
+            persona = update_uc.execute(user_id, trait_name, new_value)
+
+            setattr(persona, "user_id", user_id)
+
             return ApiResponse.success(
-                persona_data, message=f"Trait '{trait_name}' updated", status_code=200
+                persona.to_dict(),
+                message=f"Trait '{trait_name}' updated",
+                status_code=200,
             )
         except Exception as e:
             logger.error(
@@ -166,24 +158,12 @@ def create_persona_blueprint(
                 limit=limit, offset=offset
             )
             data = []
-            for persona in personas:
-                data.append(
-                    {
-                        "openness": persona.openness,
-                        "conscientiousness": persona.conscientiousness,
-                        "extraversion": persona.extraversion,
-                        "agreeableness": persona.agreeableness,
-                        "neuroticism": persona.neuroticism,
-                    }
-                )
+            for user_id, persona in personas:
+                setattr(persona, "user_id", user_id)
+                data.append(persona.to_dict())
             return ApiResponse.success(data, status_code=200)
         except Exception as e:
             logger.error(f"Error listing personas: {str(e)}", exc_info=True)
             return ApiResponse.error("Internal server error", status_code=500)
-
-    @bp.route("/api/health", methods=["GET"])
-    def health_check() -> ResponseType:
-
-        return ApiResponse.success({"status": "ok"})
 
     return bp

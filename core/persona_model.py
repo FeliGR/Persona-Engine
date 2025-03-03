@@ -1,20 +1,18 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, ClassVar, Tuple
-from core.exceptions import TraitValidationError, TraitNotFoundError
+from typing import Any, Dict, ClassVar, Tuple
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class PersonaValidationError(ValueError):
-
     pass
 
 
 @dataclass
 class Persona:
-
     MIN_TRAIT_VALUE: ClassVar[float] = 1.0
     MAX_TRAIT_VALUE: ClassVar[float] = 5.0
     TRAIT_NAMES: ClassVar[Tuple[str, ...]] = (
@@ -43,24 +41,21 @@ class Persona:
 
     def validate_ranges(self) -> None:
         invalid_traits = []
-
-        for trait_name in self.TRAIT_NAMES:
-            trait_value = getattr(self, trait_name)
-            if not isinstance(trait_value, (int, float)):
+        for trait in self.TRAIT_NAMES:
+            value = getattr(self, trait)
+            if not isinstance(value, (int, float)):
                 invalid_traits.append(
-                    f"{trait_name} must be a number, got {type(trait_value).__name__}"
+                    f"{trait} must be a number, got {type(value).__name__}"
                 )
-            elif (
-                trait_value < self.MIN_TRAIT_VALUE or trait_value > self.MAX_TRAIT_VALUE
-            ):
+            elif not (self.MIN_TRAIT_VALUE <= value <= self.MAX_TRAIT_VALUE):
                 invalid_traits.append(
-                    f"{trait_name} ({trait_value}) must be between "
-                    f"{self.MIN_TRAIT_VALUE} and {self.MAX_TRAIT_VALUE}"
+                    f"{trait} ({value}) must be between {self.MIN_TRAIT_VALUE} and {self.MAX_TRAIT_VALUE}"
                 )
-
         if invalid_traits:
-            error_msg = "; ".join(invalid_traits)
-            raise PersonaValidationError(error_msg)
+            raise PersonaValidationError("; ".join(invalid_traits))
 
-    def to_dict(self) -> Dict[str, float]:
-        return {trait: getattr(self, trait) for trait in self.TRAIT_NAMES}
+    def to_dict(self, include_user_id: bool = True) -> Dict[str, Any]:
+        data = {trait: getattr(self, trait) for trait in self.TRAIT_NAMES}
+        if include_user_id and hasattr(self, "user_id"):
+            data["user_id"] = self.user_id
+        return data

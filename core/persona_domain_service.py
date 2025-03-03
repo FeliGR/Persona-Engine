@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any
+
 from core.persona_model import Persona
 from core.exceptions import TraitNotFoundError, TraitValidationError
 
@@ -47,14 +47,6 @@ class PersonaDomainService:
                 logger.exception(f"Unexpected error updating trait: {str(e)}")
                 raise
             raise
-
-    @staticmethod
-    def _create_snapshot(persona: Persona) -> Dict[str, Any]:
-
-        return {key: getattr(persona, key) for key in vars(persona)}
-
-    @staticmethod
-    def _restore_snapshot(persona: Persona, snapshot: Dict[str, Any]) -> None:
 
         for key, value in snapshot.items():
             setattr(persona, key, value)

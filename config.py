@@ -23,7 +23,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     LOG_LEVEL = "DEBUG"
-    REPOSITORY_TYPE = "memory"
+    REPOSITORY_TYPE = os.environ.get("REPOSITORY_TYPE", "postgres")
 
 
 class ProductionConfig(Config):
@@ -36,4 +36,4 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     LOG_LEVEL = "DEBUG"
-    REPOSITORY_TYPE = "memory"
+    REPOSITORY_TYPE = os.environ.get("REPOSITORY_TYPE", "postgres")

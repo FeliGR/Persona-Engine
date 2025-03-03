@@ -1,6 +1,7 @@
 import logging
-from typing import Optional, Dict, List
 import threading
+from typing import Optional, Dict, List, Tuple
+
 from application.persona_repository_interface import IPersonaRepository
 from core.persona_model import Persona
 
@@ -51,14 +52,9 @@ class InMemoryPersonaRepository(IPersonaRepository):
             self._logger.exception(f"Error saving persona for user_id={user_id}")
             raise PersonaRepositoryError(f"Failed to save persona: {str(e)}") from e
 
-    def list_personas(self, limit: int = 100, offset: int = 0) -> List[Persona]:
-        try:
-            with self._lock:
-                all_personas = list(self._storage.values())
-                self._logger.debug(
-                    f"Retrieved {len(all_personas[offset:offset+limit])} personas"
-                )
-                return all_personas[offset : offset + limit]
-        except Exception as e:
-            self._logger.exception(f"Error listing personas")
-            raise PersonaRepositoryError(f"Failed to list personas: {str(e)}") from e
+    def list_personas(
+        self, limit: int = 100, offset: int = 0
+    ) -> List[Tuple[str, Persona]]:
+        with self._lock:
+            all_personas = list(self._storage.items())
+            return all_personas[offset : offset + limit]

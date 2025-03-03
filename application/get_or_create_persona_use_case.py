@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+
 from core.persona_model import Persona
 from application.persona_repository_interface import IPersonaRepository
 

@@ -1,8 +1,8 @@
+import sys
 import logging
 import logging.handlers
-import sys
-from typing import Optional, Dict, Union
 from pathlib import Path
+from typing import Optional, Dict, Union
 
 
 class LoggerFactory:
