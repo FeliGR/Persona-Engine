@@ -1,7 +1,7 @@
 import logging
 
-from core.persona_model import Persona
-from core.exceptions import TraitNotFoundError, TraitValidationError
+from core.domain.persona_model import Persona
+from core.domain.exceptions import TraitNotFoundError, TraitValidationError
 
 
 logger = logging.getLogger(__name__)

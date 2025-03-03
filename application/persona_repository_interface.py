@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
-from core.persona_model import Persona
+from core.domain.persona_model import Persona
 
 
 class IPersonaRepository(ABC):

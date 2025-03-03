@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional
 
 from application.persona_repository_interface import IPersonaRepository
 from core.persona_domain_service import PersonaDomainService
-from core.persona_model import Persona
+from core.domain.persona_model import Persona
 
 
 logger = logging.getLogger(__name__)

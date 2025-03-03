@@ -6,7 +6,7 @@ from application.persona_repository_interface import (
     IPersonaRepository,
     PersonaRepositoryError,
 )
-from core.persona_model import Persona
+from core.domain.persona_model import Persona
 
 
 class InMemoryPersonaRepository(IPersonaRepository):
