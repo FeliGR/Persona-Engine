@@ -2,7 +2,7 @@ import logging
 
 from core.domain.exceptions import PersonaNotFoundError
 from core.domain.persona_model import Persona
-from application.persona_repository_interface import IPersonaRepository
+from usecases.persona_repository_interface import IPersonaRepository
 
 logger = logging.getLogger(__name__)
 

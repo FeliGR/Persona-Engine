@@ -11,9 +11,9 @@ from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import HTTPException
 
 from config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
-from application.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
-from application.get_persona_use_case import GetPersonaUseCase
-from application.update_persona_use_case import UpdatePersonaUseCase
+from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
+from usecases.get_persona_use_case import GetPersonaUseCase
+from usecases.update_persona_use_case import UpdatePersonaUseCase
 from adapters.controllers.persona_controller import create_persona_blueprint
 from adapters.repositories.in_memory_persona_repository import InMemoryPersonaRepository
 from utils.logger import logger

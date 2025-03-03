@@ -15,7 +15,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 
-from application.persona_repository_interface import IPersonaRepository
+from usecases.persona_repository_interface import IPersonaRepository
 from core.domain.exceptions import DatabaseError
 from core.domain.persona_model import Persona
 from utils.logger import logger

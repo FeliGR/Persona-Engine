@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 
-from application.persona_repository_interface import IPersonaRepository
+from usecases.persona_repository_interface import IPersonaRepository
 from core.persona_domain_service import PersonaDomainService
 from core.domain.persona_model import Persona
 

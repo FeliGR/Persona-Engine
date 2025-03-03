@@ -5,9 +5,9 @@ from typing import Any, Callable, Dict, Tuple, TypeVar, cast
 from flask import Blueprint, request, jsonify, current_app
 from marshmallow import Schema, fields, ValidationError, validate
 
-from application.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
-from application.get_persona_use_case import GetPersonaUseCase, PersonaNotFoundError
-from application.update_persona_use_case import UpdatePersonaUseCase
+from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
+from usecases.get_persona_use_case import GetPersonaUseCase, PersonaNotFoundError
+from usecases.update_persona_use_case import UpdatePersonaUseCase
 
 from utils.logger import logger
 
