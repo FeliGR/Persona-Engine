@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, ClassVar, Tuple
 
-from core.exceptions import PersonaValidationError
+from core.domain.exceptions import PersonaValidationError
 
 
 logging.basicConfig(level=logging.INFO)

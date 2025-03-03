@@ -2,10 +2,9 @@ import logging
 import threading
 from typing import Optional, Dict, List, Tuple
 
-from usecases.persona_repository_interface import (
-    IPersonaRepository,
-    PersonaRepositoryError,
-)
+from core.domain.exceptions import PersonaRepositoryError
+from usecases.persona_repository_interface import IPersonaRepository
+
 from core.domain.persona_model import Persona
 
 
