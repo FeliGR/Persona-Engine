@@ -1,13 +1,10 @@
 import logging
 
+from core.exceptions import PersonaNotFoundError
 from core.persona_model import Persona
 from application.persona_repository_interface import IPersonaRepository
 
 logger = logging.getLogger(__name__)
-
-
-class PersonaNotFoundError(Exception):
-    pass
 
 
 class GetPersonaUseCase:

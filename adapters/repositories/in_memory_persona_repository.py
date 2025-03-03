@@ -2,13 +2,11 @@ import logging
 import threading
 from typing import Optional, Dict, List, Tuple
 
-from application.persona_repository_interface import IPersonaRepository
+from application.persona_repository_interface import (
+    IPersonaRepository,
+    PersonaRepositoryError,
+)
 from core.persona_model import Persona
-
-
-class PersonaRepositoryError(Exception):
-
-    pass
 
 
 class InMemoryPersonaRepository(IPersonaRepository):

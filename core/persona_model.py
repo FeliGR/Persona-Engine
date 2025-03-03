@@ -2,13 +2,11 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, ClassVar, Tuple
 
+from core.exceptions import PersonaValidationError
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-class PersonaValidationError(ValueError):
-    pass
 
 
 @dataclass

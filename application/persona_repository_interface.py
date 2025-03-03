@@ -4,11 +4,6 @@ from typing import List, Tuple
 from core.persona_model import Persona
 
 
-class PersonaRepositoryError(Exception):
-
-    pass
-
-
 class IPersonaRepository(ABC):
 
     @abstractmethod
