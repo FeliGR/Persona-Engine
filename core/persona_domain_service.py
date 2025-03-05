@@ -1,52 +1,17 @@
-import logging
-
+from utils.logger import logger
 from core.domain.persona_model import Persona
-from core.domain.exceptions import TraitNotFoundError, TraitValidationError
-
-
-logger = logging.getLogger(__name__)
-
+from core.domain.exceptions import TraitNotFoundError
 
 class PersonaDomainService:
-
     @classmethod
     def update_trait(
         cls, persona: Persona, trait_name: str, new_value: float
     ) -> Persona:
+        if trait_name not in Persona.TRAIT_NAMES:
+            logger.error(f"Trait '{trait_name}' not found on Persona")
+            raise TraitNotFoundError(f"Trait '{trait_name}' not found on Persona.")
 
-        logger.debug(
-            f"Updating trait '{trait_name}' to {new_value} for persona: {persona.id}"
-        )
-
-        try:
-
-            if not hasattr(persona, trait_name):
-                logger.error(f"Trait '{trait_name}' not found on Persona")
-                raise TraitNotFoundError(f"Trait '{trait_name}' not found on Persona.")
-
-            previous_value = getattr(persona, trait_name)
-
-            setattr(persona, trait_name, new_value)
-
-            try:
-                persona.validate_ranges()
-                logger.info(
-                    f"Successfully updated trait '{trait_name}' from {previous_value} to {new_value}"
-                )
-                return persona
-            except Exception as e:
-                logger.error(f"Validation error after updating trait: {str(e)}")
-
-                setattr(persona, trait_name, previous_value)
-                raise TraitValidationError(
-                    f"Invalid value for trait '{trait_name}': {str(e)}"
-                )
-
-        except Exception as e:
-            if not isinstance(e, (TraitNotFoundError, TraitValidationError)):
-                logger.exception(f"Unexpected error updating trait: {str(e)}")
-                raise
-            raise
-
-        for key, value in snapshot.items():
-            setattr(persona, key, value)
+        setattr(persona, trait_name, new_value)
+        persona.validate_ranges()
+        logger.info(f"Successfully updated trait '{trait_name}' to {new_value}")
+        return persona

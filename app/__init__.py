@@ -8,7 +8,7 @@ from .handlers import (
     register_shutdown_handlers,
 )
 from .routes import register_routes
-from adapters.repositories.in_memory_persona_repository import InMemoryPersonaRepository
+from adapters.repositories.sqlalchemy_persona_repository import SQLAlchemyPersonaRepository
 from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
 from usecases.get_persona_use_case import GetPersonaUseCase
 from usecases.update_persona_use_case import UpdatePersonaUseCase
@@ -48,18 +48,8 @@ class ApplicationFactory:
 
     @staticmethod
     def _register_repositories(app: Flask) -> None:
-        repo_type = app.config.get("REPOSITORY_TYPE", "memory")
-        if repo_type == "memory":
-            app.persona_repository = InMemoryPersonaRepository()
-        elif repo_type == "postgres":
-            from adapters.repositories.sqlalchemy_persona_repository import (
-                SQLAlchemyPersonaRepository,
-            )
-
-            app.persona_repository = SQLAlchemyPersonaRepository(app.config["DB_URI"])
-        else:
-            app.persona_repository = InMemoryPersonaRepository()
-        logger.info(f"Using {repo_type} repository")
+        app.persona_repository = SQLAlchemyPersonaRepository(app.config["DB_URI"])
+        logger.info("Using SQLAlchemy repository")
 
     @staticmethod
     def _register_use_cases(app: Flask) -> None:

@@ -1,11 +1,8 @@
-import logging
+from utils.logger import logger
 from typing import Optional
 
 from core.domain.persona_model import Persona
 from usecases.persona_repository_interface import IPersonaRepository
-
-logger = logging.getLogger(__name__)
-
 
 class GetOrCreatePersonaUseCase:
 
@@ -46,7 +43,7 @@ class GetOrCreatePersonaUseCase:
 
     def _create_and_save_persona(self, user_id: str) -> Persona:
         try:
-            persona = self._create_default_persona()
+            persona = self._create_default_persona(user_id)
             self.repository.save_persona(user_id, persona)
             logger.debug(
                 f"Successfully created and saved persona for user_id: {user_id}"
@@ -58,8 +55,9 @@ class GetOrCreatePersonaUseCase:
             )
             raise
 
-    def _create_default_persona(self) -> Persona:
+    def _create_default_persona(self, user_id: str) -> Persona:
         return Persona(
+            user_id=user_id,
             openness=3.0,
             conscientiousness=3.0,
             extraversion=3.0,
