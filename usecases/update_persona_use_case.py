@@ -1,7 +1,7 @@
 from utils.logger import logger
 from core.domain.persona_model import Persona
-from usecases.persona_repository_interface import IPersonaRepository
-from core.persona_domain_service import PersonaDomainService
+from core.interfaces.persona_repository_interface import IPersonaRepository
+from core.services.persona_domain_service import PersonaDomainService
 
 class UpdatePersonaUseCase:
     def __init__(self, repository: IPersonaRepository):

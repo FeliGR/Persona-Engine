@@ -1,7 +1,7 @@
 from utils.logger import logger
 from core.domain.exceptions import PersonaNotFoundError
 from core.domain.persona_model import Persona
-from usecases.persona_repository_interface import IPersonaRepository
+from core.interfaces.persona_repository_interface import IPersonaRepository
 
 class GetPersonaUseCase:
     def __init__(self, repository: IPersonaRepository):

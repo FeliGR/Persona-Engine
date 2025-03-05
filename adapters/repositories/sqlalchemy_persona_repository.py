@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from core.domain.persona_model import Persona, Base
 from core.domain.exceptions import DatabaseError
-from usecases.persona_repository_interface import IPersonaRepository
+from core.interfaces.persona_repository_interface import IPersonaRepository
 from utils.logger import logger
 
 
