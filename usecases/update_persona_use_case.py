@@ -1,9 +1,11 @@
-from utils.logger import logger
 from core.domain.persona_model import Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
+from core.interfaces.use_case_interfaces import IUpdatePersonaUseCase
 from core.services.persona_domain_service import PersonaDomainService
+from utils.logger import logger
 
-class UpdatePersonaUseCase:
+
+class UpdatePersonaUseCase(IUpdatePersonaUseCase):
     def __init__(self, repository: IPersonaRepository):
         self.repository = repository
 

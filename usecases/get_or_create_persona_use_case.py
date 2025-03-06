@@ -1,10 +1,12 @@
-from utils.logger import logger
 from typing import Optional
 
 from core.domain.persona_model import Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
+from core.interfaces.use_case_interfaces import IGetOrCreatePersonaUseCase
+from utils.logger import logger
 
-class GetOrCreatePersonaUseCase:
+
+class GetOrCreatePersonaUseCase(IGetOrCreatePersonaUseCase):
 
     def __init__(self, repository: IPersonaRepository):
         if not repository:
