@@ -12,7 +12,7 @@ adapter between the HTTP layer and the application's use cases.
 from functools import wraps
 from typing import Any, Callable, Dict, Tuple, TypeVar, cast
 
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 from marshmallow import Schema, ValidationError, fields, validate
 
 from core.domain.exceptions import PersonaValidationError, TraitNotFoundError
@@ -20,7 +20,7 @@ from core.interfaces.persona_controller_interface import IPersonaController
 from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
 from usecases.get_persona_use_case import GetPersonaUseCase, PersonaNotFoundError
 from usecases.update_persona_use_case import UpdatePersonaUseCase
-from utils.logger import logger
+from utils.logger import app_logger
 
 ResponseType = Tuple[Dict[str, Any], int]
 F = TypeVar("F", bound=Callable[..., ResponseType])
@@ -116,7 +116,7 @@ def validate_user_id(f: F) -> F:
     @wraps(f)
     def decorated_function(user_id: str, *args: Any, **kwargs: Any) -> ResponseType:
         if not user_id or not isinstance(user_id, str):
-            logger.warning("Invalid user ID: %s", user_id)
+            app_logger.warning("Invalid user ID: %s", user_id)
             return ApiResponse.error("Invalid user ID", status_code=400)
         return f(user_id, *args, **kwargs)
 
@@ -166,7 +166,7 @@ class PersonaController(IPersonaController):
                 message=f"No persona found for user ID: {user_id}", status_code=404
             )
         except Exception as e:
-            logger.error(
+            app_logger.error(
                 "Error retrieving persona for user %s: %s",
                 user_id,
                 str(e),
@@ -193,7 +193,7 @@ class PersonaController(IPersonaController):
                 persona.to_dict(), message="Persona created", status_code=201
             )
         except Exception as e:
-            logger.error("Error creating persona: %s", str(e), exc_info=True)
+            app_logger.error("Error creating persona: %s", str(e), exc_info=True)
             return ApiResponse.error("Internal server error", status_code=500)
 
     def update_persona(self, user_id: str) -> ResponseType:
@@ -232,7 +232,44 @@ class PersonaController(IPersonaController):
                 "Validation error", details=err.messages, status_code=400
             )
         except Exception as e:
-            logger.error(
+            app_logger.error(
                 "Error updating persona for user %s: %s", user_id, str(e), exc_info=True
             )
             return ApiResponse.error("Internal server error", status_code=500)
+
+
+def create_persona_blueprint(
+    get_persona_use_case: GetPersonaUseCase,
+    get_or_create_persona_use_case: GetOrCreatePersonaUseCase,
+    update_persona_use_case: UpdatePersonaUseCase,
+) -> Blueprint:
+    """
+    Create and configure a Flask blueprint for persona API endpoints.
+
+    Args:
+        get_persona_use_case: Use case for retrieving personas
+        get_or_create_persona_use_case: Use case for creating personas
+        update_persona_use_case: Use case for updating personas
+
+    Returns:
+        Blueprint: Configured Flask blueprint with persona routes
+    """
+    blueprint = Blueprint("persona", __name__, url_prefix="/api/personas")
+
+    controller = PersonaController(
+        get_persona_use_case, get_or_create_persona_use_case, update_persona_use_case
+    )
+
+    @blueprint.route("/<user_id>", methods=["GET"])
+    def get_persona(user_id):
+        return controller.get_persona(user_id)
+
+    @blueprint.route("/", methods=["POST"])
+    def create_persona():
+        return controller.create_persona()
+
+    @blueprint.route("/<user_id>", methods=["PUT"])
+    def update_persona(user_id):
+        return controller.update_persona(user_id)
+
+    return blueprint

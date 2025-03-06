@@ -11,7 +11,8 @@ within the entity models themselves, keeping the domain model focused and clean.
 
 from core.domain.exceptions import TraitNotFoundError
 from core.domain.persona_model import Persona
-from core.interfaces.persona_domain_service_interface import IPersonaDomainService
+from core.interfaces.persona_domain_service_interface import \
+    IPersonaDomainService
 from utils.logger import logger
 
 

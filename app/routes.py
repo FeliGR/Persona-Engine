@@ -1,5 +1,6 @@
-from flask import Flask, jsonify
 import time
+
+from flask import Flask, jsonify
 
 
 def register_routes(app: Flask) -> None:

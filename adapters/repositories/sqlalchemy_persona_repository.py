@@ -14,7 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from core.domain.exceptions import DatabaseError
 from core.domain.persona_model import Base, Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
-from utils.logger import logger
+from utils.logger import app_logger
 
 
 class SQLAlchemyPersonaRepository(IPersonaRepository):
@@ -31,7 +31,7 @@ class SQLAlchemyPersonaRepository(IPersonaRepository):
         self.engine = create_engine(db_uri, echo=echo)
         self.session_factory = sessionmaker(bind=self.engine, expire_on_commit=False)
         Base.metadata.create_all(self.engine)
-        logger.info("Database schema initialized successfully using ORM")
+        app_logger.info("Database schema initialized successfully using ORM")
 
     @contextmanager
     def _session_scope(self):
@@ -50,7 +50,7 @@ class SQLAlchemyPersonaRepository(IPersonaRepository):
             session.commit()
         except exc.SQLAlchemyError as e:
             session.rollback()
-            logger.error("Database transaction failed: %s", e, exc_info=True)
+            app_logger.error("Database transaction failed: %s", e, exc_info=True)
             raise DatabaseError(f"Database operation failed: {e}") from e
         finally:
             session.close()
@@ -65,13 +65,13 @@ class SQLAlchemyPersonaRepository(IPersonaRepository):
         Returns:
             Optional[Persona]: The persona instance if found, otherwise None.
         """
-        logger.debug("Retrieving persona for user_id: %s", user_id)
+        app_logger.debug("Retrieving persona for user_id: %s", user_id)
         with self._session_scope() as session:
             persona = session.query(Persona).filter_by(user_id=user_id).first()
             if persona:
-                logger.info("Persona found for user_id: %s", user_id)
+                app_logger.info("Persona found for user_id: %s", user_id)
                 return persona
-            logger.info("No persona found for user_id: %s", user_id)
+            app_logger.info("No persona found for user_id: %s", user_id)
             return None
 
     def save_persona(self, user_id: str, persona: Persona) -> None:
@@ -89,11 +89,11 @@ class SQLAlchemyPersonaRepository(IPersonaRepository):
             raise ValueError("User ID cannot be empty")
         if not isinstance(persona, Persona):
             raise ValueError("Invalid persona object")
-        logger.debug("Saving persona for user_id: %s", user_id)
+        app_logger.debug("Saving persona for user_id: %s", user_id)
         with self._session_scope() as session:
             session.merge(persona)
             session.flush()
-            logger.info("Persona saved successfully for user_id: %s", user_id)
+            app_logger.info("Persona saved successfully for user_id: %s", user_id)
 
     def list_personas(self, limit: int = 100, offset: int = 0) -> List[tuple]:
         """
@@ -107,8 +107,8 @@ class SQLAlchemyPersonaRepository(IPersonaRepository):
             List[tuple]: A list of tuples, where each tuple contains the user_id
             and the corresponding Persona object.
         """
-        logger.debug("Listing personas with limit=%s, offset=%s", limit, offset)
+        app_logger.debug("Listing personas with limit=%s, offset=%s", limit, offset)
         with self._session_scope() as session:
             personas = session.query(Persona).offset(offset).limit(limit).all()
-            logger.info("Retrieved %s personas", len(personas))
+            app_logger.info("Retrieved %s personas", len(personas))
             return [(p.user_id, p) for p in personas]

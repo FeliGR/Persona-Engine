@@ -5,11 +5,11 @@ class ILogger(ABC):
     @abstractmethod
     def debug(self, message: str, **kwargs) -> None:
         pass
-    
+
     @abstractmethod
     def info(self, message: str, **kwargs) -> None:
         pass
-    
+
     @abstractmethod
     def error(self, message: str, **kwargs) -> None:
         pass
