@@ -13,7 +13,7 @@ from core.domain.exceptions import TraitNotFoundError
 from core.domain.persona_model import Persona
 from core.interfaces.persona_domain_service_interface import \
     IPersonaDomainService
-from utils.logger import logger
+from utils.logger import app_logger
 
 
 class PersonaDomainService(IPersonaDomainService):
@@ -47,10 +47,10 @@ class PersonaDomainService(IPersonaDomainService):
             TraitValidationError: If the trait value is invalid (raised by validate_ranges).
         """
         if trait_name not in Persona.TRAIT_NAMES:
-            logger.error("Trait '%s' not found on Persona", trait_name)
+            app_logger.error("Trait '%s' not found on Persona", trait_name)
             raise TraitNotFoundError(f"Trait '{trait_name}' not found on Persona.")
 
         setattr(persona, trait_name, new_value)
         persona.validate_ranges()
-        logger.info("Successfully updated trait '%s' to %s", trait_name, new_value)
+        app_logger.info("Successfully updated trait '%s' to %s", trait_name, new_value)
         return persona

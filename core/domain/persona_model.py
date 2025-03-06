@@ -6,7 +6,7 @@ from sqlalchemy import Column, Float, String
 from sqlalchemy.ext.declarative import declarative_base
 
 from core.domain.exceptions import PersonaValidationError
-from utils.logger import logger
+from utils.logger import app_logger
 
 Base = declarative_base()
 
@@ -73,7 +73,7 @@ class Persona(Base):
         self.agreeableness = agreeableness
         self.neuroticism = neuroticism
         self.validate_ranges()
-        logger.info("Created valid Persona with traits: %s", self.to_dict())
+        app_logger.info("Created valid Persona with traits: %s", self.to_dict())
 
     def validate_ranges(self) -> None:
         """
