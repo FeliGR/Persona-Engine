@@ -15,7 +15,7 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from utils.logger import app_logger
+from adapters.loggers.logger_adapter import app_logger
 
 
 def register_extensions(app: Flask) -> None:

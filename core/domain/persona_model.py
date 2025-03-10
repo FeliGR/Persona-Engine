@@ -1,12 +1,20 @@
 """
-Module for defining the Persona model and handling personality trait validations.
+Persona Model Module
+
+This module defines the Persona domain model representing users' personality traits
+based on the Five-Factor Model (Big Five): Openness, Conscientiousness, Extraversion,
+Agreeableness, and Neuroticism. Each trait is normalized on a scale from 1.0 to 5.0.
+
+The Persona class provides validation logic for trait boundaries, data conversion
+utilities, and integrates with SQLAlchemy ORM for database persistence. This model
+serves as the core domain entity for personality-based features in the system.
 """
 
 from sqlalchemy import Column, Float, String
 from sqlalchemy.ext.declarative import declarative_base
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.exceptions import PersonaValidationError
-from utils.logger import app_logger
 
 Base = declarative_base()
 

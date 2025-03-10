@@ -9,11 +9,11 @@ Domain services encapsulate complex business rules that don't naturally fit
 within the entity models themselves, keeping the domain model focused and clean.
 """
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.exceptions import TraitNotFoundError
 from core.domain.persona_model import Persona
 from core.interfaces.persona_domain_service_interface import \
     IPersonaDomainService
-from utils.logger import app_logger
 
 
 class PersonaDomainService(IPersonaDomainService):

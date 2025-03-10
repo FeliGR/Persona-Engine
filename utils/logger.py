@@ -123,6 +123,3 @@ def setup_logger(config=None):
         log_to_file=getattr(config, "LOG_TO_FILE", False),
         log_file_path=getattr(config, "LOG_FILE_PATH", None),
     )
-
-
-app_logger = setup_logger()

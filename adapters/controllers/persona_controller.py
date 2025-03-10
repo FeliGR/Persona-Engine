@@ -15,13 +15,13 @@ from typing import Any, Callable, Dict, Tuple, TypeVar, cast
 from flask import Blueprint, jsonify, request
 from marshmallow import Schema, ValidationError, fields, validate
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.exceptions import PersonaValidationError, TraitNotFoundError
 from core.interfaces.persona_controller_interface import IPersonaController
 from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
 from usecases.get_persona_use_case import (GetPersonaUseCase,
                                            PersonaNotFoundError)
 from usecases.update_persona_use_case import UpdatePersonaUseCase
-from utils.logger import app_logger
 
 ResponseType = Tuple[Dict[str, Any], int]
 F = TypeVar("F", bound=Callable[..., ResponseType])
@@ -117,7 +117,7 @@ def validate_user_id(f: F) -> F:
     @wraps(f)
     def decorated_function(user_id: str, *args: Any, **kwargs: Any) -> ResponseType:
         if not user_id or not isinstance(user_id, str):
-            app_logger.warning("Invalid user ID: %s", user_id)
+            app_logger.error("Invalid user ID: %s", user_id)
             return ApiResponse.error("Invalid user ID", status_code=400)
         return f(user_id, *args, **kwargs)
 

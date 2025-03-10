@@ -12,10 +12,10 @@ separation of concerns between the application layers.
 
 from typing import Optional
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.persona_model import Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
 from core.interfaces.use_case_interfaces import IGetOrCreatePersonaUseCase
-from utils.logger import app_logger
 
 
 class GetOrCreatePersonaUseCase(IGetOrCreatePersonaUseCase):
@@ -72,7 +72,7 @@ class GetOrCreatePersonaUseCase(IGetOrCreatePersonaUseCase):
             return persona
 
         except Exception as e:
-            app_logger.exception(
+            app_logger.error(
                 "Error in GetOrCreatePersonaUseCase for user_id %s: %s", user_id, str(e)
             )
             raise

@@ -10,11 +10,11 @@ maintaining separation of concerns while ensuring that domain rules are consiste
 applied when modifying persona traits.
 """
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.persona_model import Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
 from core.interfaces.use_case_interfaces import IUpdatePersonaUseCase
 from core.services.persona_domain_service import PersonaDomainService
-from utils.logger import app_logger
 
 
 class UpdatePersonaUseCase(IUpdatePersonaUseCase):

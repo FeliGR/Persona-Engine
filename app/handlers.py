@@ -16,7 +16,7 @@ import time
 from flask import Flask, g, jsonify, request
 from werkzeug.exceptions import HTTPException
 
-from utils.logger import app_logger
+from adapters.loggers.logger_adapter import app_logger
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -33,7 +33,7 @@ def register_error_handlers(app: Flask) -> None:
 
     @app.errorhandler(400)
     def handle_bad_request(error):
-        app_logger.warning("Bad request: %s", error)
+        app_logger.error("Bad request: %s", error)
         return jsonify({"error": "Bad request", "message": str(error)}), 400
 
     @app.errorhandler(404)
@@ -42,7 +42,7 @@ def register_error_handlers(app: Flask) -> None:
 
     @app.errorhandler(429)
     def handle_rate_limit_exceeded(error):
-        app_logger.warning("Rate limit exceeded: %s", error)
+        app_logger.error("Rate limit exceeded: %s", error)
         return jsonify({"error": "Too many requests", "message": str(error)}), 429
 
     @app.errorhandler(HTTPException)

@@ -9,11 +9,11 @@ The use case acts as an intermediary between the controller and repository layer
 ensuring that domain rules are consistently applied when retrieving personas.
 """
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.exceptions import PersonaNotFoundError
 from core.domain.persona_model import Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
 from core.interfaces.use_case_interfaces import IGetPersonaUseCase
-from utils.logger import app_logger
 
 
 class GetPersonaUseCase(IGetPersonaUseCase):

@@ -11,10 +11,10 @@ from typing import List, Optional
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
 
+from adapters.loggers.logger_adapter import app_logger
 from core.domain.exceptions import DatabaseError
 from core.domain.persona_model import Base, Persona
 from core.interfaces.persona_repository_interface import IPersonaRepository
-from utils.logger import app_logger
 
 
 class SQLAlchemyPersonaRepository(IPersonaRepository):
