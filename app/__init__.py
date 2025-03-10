@@ -1,3 +1,15 @@
+"""
+Flask Application Factory Module
+
+This module provides a factory pattern implementation for creating and configuring
+Flask applications in different environments (development, testing, production).
+It handles the registration of extensions, repositories, use cases, blueprints,
+error handlers, and routes.
+
+The ApplicationFactory class ensures consistent application setup with proper
+dependency injection and configuration based on the environment.
+"""
+
 import os
 from typing import Type
 
@@ -43,60 +55,70 @@ class ApplicationFactory:
             }
             config_class = config_map.get(env, DevelopmentConfig)
 
-        _app = Flask(__name__)
-        app.config.from_object(config_class)
+        flask_app = Flask(__name__)
+        flask_app.config.from_object(config_class)
 
-        register_extensions(app)
-        ApplicationFactory._register_repositories(app)
-        ApplicationFactory._register_use_cases(app)
-        ApplicationFactory._register_blueprints(app)
-        register_error_handlers(app)
-        register_request_hooks(app)
-        register_shutdown_handlers(_app)
-        register_routes(app)
+        register_extensions(flask_app)
+        ApplicationFactory._register_repositories(flask_app)
+        ApplicationFactory._register_use_cases(flask_app)
+        ApplicationFactory._register_blueprints(flask_app)
+        register_error_handlers(flask_app)
+        register_request_hooks(flask_app)
+        register_shutdown_handlers(flask_app)
+        register_routes(flask_app)
 
         app_logger.info(
             "Application started in %s mode",
             os.environ.get("FLASK_ENV", "development").lower(),
         )
-        return app
+        return flask_app
 
     @staticmethod
-    def _register_repositories(_app: Flask) -> None:
+    def _register_repositories(flask_app: Flask) -> None:
         """
         Registers repositories and attaches them to the Flask app.
 
         Args:
-            app (Flask): The Flask application instance.
+            flask_app (Flask): The Flask application instance.
         """
-        _app.persona_repository = SQLAlchemyPersonaRepository(_app.config["DB_URI"])
+        flask_app.persona_repository = SQLAlchemyPersonaRepository(
+            flask_app.config["DB_URI"]
+        )
         app_logger.info("Using SQLAlchemy repository")
 
     @staticmethod
-    def _register_use_cases(_app: Flask) -> None:
+    def _register_use_cases(flask_app: Flask) -> None:
         """
         Registers use cases and attaches them to the Flask app.
 
         Args:
-            app (Flask): The Flask application instance.
+            flask_app (Flask): The Flask application instance.
         """
-        repo = _app.persona_repository
-        _app.get_or_create_persona_use_case = GetOrCreatePersonaUseCase(repo)
-        _app.get_persona_use_case = GetPersonaUseCase(repo)
-        _app.update_persona_use_case = UpdatePersonaUseCase(repo)
+        repo = flask_app.persona_repository
+        flask_app.get_or_create_persona_use_case = GetOrCreatePersonaUseCase(repo)
+        flask_app.get_persona_use_case = GetPersonaUseCase(repo)
+        flask_app.update_persona_use_case = UpdatePersonaUseCase(repo)
 
     @staticmethod
-    def _register_blueprints(_app: Flask) -> None:
+    def _register_blueprints(flask_app: Flask) -> None:
         """
         Registers blueprints for the Flask application.
 
         Args:
-            app (Flask): The Flask application instance.
+            flask_app (Flask): The Flask application instance.
         """
-        app.register_blueprint(create_persona_blueprint)
+        persona_bp = create_persona_blueprint(
+            flask_app.get_persona_use_case,
+            flask_app.get_or_create_persona_use_case,
+            flask_app.update_persona_use_case,
+        )
+        flask_app.register_blueprint(persona_bp)
 
 
+# Create convenience function for WSGI servers
 create_app = ApplicationFactory.create_app
+
+# Create default application instance
 app = create_app()
 
 if __name__ == "__main__":
