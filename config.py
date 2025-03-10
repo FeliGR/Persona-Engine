@@ -65,7 +65,7 @@ class ProductionConfig(Config):
     """
 
     DEBUG = False
-    LOG_LEVEL = os.environ.get("LOG_LEVEL", "WARNING")
+    LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
     REPOSITORY_TYPE = os.environ.get("REPOSITORY_TYPE", "postgres")
 
 

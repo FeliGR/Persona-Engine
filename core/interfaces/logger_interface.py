@@ -10,6 +10,12 @@ from abc import ABC, abstractmethod
 
 
 class ILogger(ABC):
+    """
+    Interface for logging implementations.
+    
+    Classes implementing this interface must provide methods for
+    debug, info, and error level logging.
+    """
     @abstractmethod
     def debug(self, message: str, *args, **kwargs) -> None:
         """
@@ -20,7 +26,6 @@ class ILogger(ABC):
             *args: Additional positional arguments for message formatting.
             **kwargs: Additional keyword arguments.
         """
-        pass
 
     @abstractmethod
     def info(self, message: str, *args, **kwargs) -> None:
@@ -32,7 +37,6 @@ class ILogger(ABC):
             *args: Additional positional arguments for message formatting.
             **kwargs: Additional keyword arguments.
         """
-        pass
 
     @abstractmethod
     def error(self, message: str, *args, **kwargs) -> None:
@@ -44,4 +48,3 @@ class ILogger(ABC):
             *args: Additional positional arguments for message formatting.
             **kwargs: Additional keyword arguments.
         """
-        pass
