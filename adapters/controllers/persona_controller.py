@@ -19,8 +19,7 @@ from adapters.loggers.logger_adapter import app_logger
 from core.domain.exceptions import PersonaValidationError, TraitNotFoundError
 from core.interfaces.persona_controller_interface import IPersonaController
 from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
-from usecases.get_persona_use_case import (GetPersonaUseCase,
-                                           PersonaNotFoundError)
+from usecases.get_persona_use_case import GetPersonaUseCase, PersonaNotFoundError
 from usecases.update_persona_use_case import UpdatePersonaUseCase
 
 ResponseType = Tuple[Dict[str, Any], int]

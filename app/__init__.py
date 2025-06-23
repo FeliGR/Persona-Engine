@@ -17,16 +17,20 @@ from flask import Flask
 
 from adapters.controllers.persona_controller import create_persona_blueprint
 from adapters.loggers.logger_adapter import app_logger
-from adapters.repositories.sqlalchemy_persona_repository import \
-    SQLAlchemyPersonaRepository
+from adapters.repositories.sqlalchemy_persona_repository import (
+    SQLAlchemyPersonaRepository,
+)
 from config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
 from usecases.get_or_create_persona_use_case import GetOrCreatePersonaUseCase
 from usecases.get_persona_use_case import GetPersonaUseCase
 from usecases.update_persona_use_case import UpdatePersonaUseCase
 
 from .extensions import register_extensions
-from .handlers import (register_error_handlers, register_request_hooks,
-                       register_shutdown_handlers)
+from .handlers import (
+    register_error_handlers,
+    register_request_hooks,
+    register_shutdown_handlers,
+)
 from .routes import register_routes
 
 
