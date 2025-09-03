@@ -1,38 +1,8 @@
 services:
-  persona-engine-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: persona-engine-service
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "5001:5001"
-    networks:
-      - persona_network
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DEBUG=False
-      - LOG_LEVEL=INFO
-      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
-      - REPOSITORY_TYPE=postgres
-      - DB_URI=postgresql://postgres:postgres@db:5432/persona_db
-      - FLASK_ENV=production
-    volumes:
-      - ./data:/app/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  db:
+  postgres-db:
     image: postgres:14-alpine
     container_name: postgres-db
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -42,14 +12,47 @@ services:
     networks:
       - persona_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d persona_db || exit 1"]
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 40s
+
+  persona-engine-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: persona-engine-service
+    restart: unless-stopped
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEBUG=False
+      - LOG_LEVEL=INFO
+      - REPOSITORY_TYPE=postgres
+      - DB_URI=postgresql://postgres:postgres@postgres-db:5432/persona_db
+      - FLASK_ENV=production
+    volumes:
+      - ./data:/app/data
+    networks:
+      - persona_network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://localhost:5001/health >/dev/null 2>&1 || curl -fsS http://localhost:5001/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
 networks:
   persona_network:
     external: true
+    name: persona_network
 
 volumes:
   pgdata:
